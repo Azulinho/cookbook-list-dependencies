@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+#
+require 'json'
+
+if ARGV[0].nil?
+  puts "Usage: cookbook-list-dependecies <cookbooks-path> <cookbook name>"
+  exit 1
+end
+
+cookbooks_path = ARGV[0].to_s
+cookbook = ARGV[1].to_s
+
+def get_version(cookbooks_path, cookbook)
+  f = File.read("#{cookbooks_path}/#{cookbook}/metadata.json")
+  version = JSON.parse(f)['version']
+  return "depends '#{cookbook}', '#{version}'"
+end
+
+def get_deps(cookbooks_path, cookbook)
+  dependencies = []
+  f = File.read("#{cookbooks_path}/#{cookbook}/metadata.json")
+  deps = JSON.parse(f)['dependencies']
+
+  deps.each do |k,v|
+    dependencies << k
+  end
+  return dependencies
+end
+
+dependencies= []
+get_deps(cookbooks_path, cookbook).each do |top_dependency|
+  dependencies << get_version(cookbooks_path, top_dependency)
+  get_deps(cookbooks_path, cookbook).each do |middle_dependency|
+    dependencies << get_version(cookbooks_path, middle_dependency)
+    get_deps(cookbooks_path, middle_dependency).each do |dependency|
+      dependencies << get_version(cookbooks_path, dependency)
+    end
+  end
+end
+
+puts dependencies.sort.uniq
