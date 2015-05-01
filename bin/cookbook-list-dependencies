@@ -3,7 +3,7 @@
 require 'json'
 
 if ARGV[0].nil?
-  puts "Usage: cookbook-list-dependecies <cookbooks-path> <cookbook name>"
+  puts "Usage: cookbook-list-dependencies <cookbooks-path> <cookbook name>"
   exit 1
 end
 
